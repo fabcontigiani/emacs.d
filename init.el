@@ -215,6 +215,11 @@
               ("g C-x" . evil-numbers/dec-at-pt)
               ("g C-X" . evil-numbers/dec-at-pt-incremental)))
 
+(use-package link-hint
+  :bind
+  ("C-c l o" . link-hint-open-link)
+  ("C-c l c" . link-hint-copy-link))
+
 (use-package general
   :after evil
   :config
@@ -1140,6 +1145,9 @@
   :custom
   (flymake-languagetool-server-jar nil)
   (flymake-languagetool-url "https://api.languagetool.org"))
+
+(use-package sqlite-mode-extras
+  :hook ((sqlite-mode . sqlite-extras-minor-mode)))
 
 (provide 'init)
 ;;; init.el ends here

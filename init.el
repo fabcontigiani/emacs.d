@@ -1017,9 +1017,6 @@
   :custom
   (citar-org-roam-subdir "citar"))
 
-(use-package org-ref
-  :commands (isbn-to-bibtex isbn-to-bibtex-lead isbn-to-bibtex-open-library))
-
 (use-package org-noter
   :bind ("C-c n p" . org-noter)
   :custom

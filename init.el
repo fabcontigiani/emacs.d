@@ -1115,6 +1115,22 @@
   :config
   (lsp-snippet-tempel-eglot-init))
 
+(use-package dape
+  :hook
+  ((kill-emacs . dape-breakpoint-save) ;; Save breakpoints on quit
+   (after-init . dape-breakpoint-load)) ;; Load breakpoints on startup
+  :config
+  ;; Global bindings for setting breakpoints with mouse
+  (dape-breakpoint-global-mode)
+  ;; Save buffers on startup, useful for interpreted languages
+  (add-hook 'dape-on-start-hooks (lambda () (save-some-buffers t t)))
+  ;; Kill compile buffer on build success
+  (add-hook 'dape-compile-compile-hooks 'kill-buffer))
+
+(use-package apheleia
+  :config
+  (apheleia-global-mode 1))
+
 (use-package rainbow-mode
   :general
   (fab/leader-keys

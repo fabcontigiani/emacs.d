@@ -26,7 +26,7 @@
   (setq use-package-always-ensure t)
   (setq use-package-compute-statistics t)
 
-  ;; Not needed on Emacs 30
+  ;; NOTE: Not needed on Emacs 30
   (unless (package-installed-p 'vc-use-package)
     (package-vc-install "https://github.com/slotThe/vc-use-package"))
 
@@ -208,12 +208,17 @@
 
 (use-package evil-numbers
   :after evil
-  :config
   :bind (:map evil-normal-state-map
               ("g C-a" . evil-numbers/inc-at-pt)
               ("g C-A" . evil-numbers/inc-at-pt-incremental)
               ("g C-x" . evil-numbers/dec-at-pt)
               ("g C-X" . evil-numbers/dec-at-pt-incremental)))
+
+(use-package evil-ts
+  :vc (:fetcher github :repo foxfriday/evil-ts)
+  :after evil
+  :config
+  (evil-ts-mode 1))
 
 (use-package link-hint
   :bind
@@ -222,6 +227,11 @@
 
 (use-package general
   :after evil
+  :init
+  (defun fab/open-tasks ()
+    "Open tasks file"
+    (interactive)
+    (find-file "~/Documents/org/tasks.org"))
   :config
   (general-create-definer fab/leader-keys
     :states '(normal insert visual emacs)
@@ -233,9 +243,13 @@
   (fab/leader-keys
     "w" '(evil-window-map :wk))
   (fab/leader-keys
+    "o" '(:ignore t :wk "Open")
+    "o a" '(org-agenda :wk "Open agenda")
+    "o t" '(fab/open-tasks :wk "Open tasks"))
+  (fab/leader-keys
     "q" '(:ignore t :wk "Quit")
     "q q" '(evil-quit :wk "Quit Emacs")
-    "q r" '(restart-emacs :wk "Restart Emac"))
+    "q r" '(restart-emacs :wk "Restart Emacs"))
   (fab/leader-keys
     "f" '(:ignore t :wk "Find")
     "f r" '(recentf-open :wk "Recent files"))
@@ -325,7 +339,7 @@
                      (bookmarks . 5)
                      (projects . 5)
                      (agenda . 5)
-                     ;(registers . 5)
+                                        ;(registers . 5)
                      )))
 
 (use-package project
@@ -360,16 +374,16 @@
 (use-package harpoon
   :vc (:fetcher github :repo kofm/harpoon.el)
   :bind (:map harpoon-minor-mode-map
-	      ("C-c j m" . 'harpoon-set)
-	      ("C-c j b" . 'harpoon-buffer)
-	      ("C-c j 1" . 'harpoon-jump-1)
-	      ("C-c j 2" . 'harpoon-jump-2)
-	      ("C-c j 3" . 'harpoon-jump-3)
-	      ("C-c j 4" . 'harpoon-jump-4)
-	      ("C-c j 5" . 'harpoon-jump-5)
-	      ("C-c j 6" . 'harpoon-jump-6)
-	      ("C-c j 7" . 'harpoon-jump-7)
-	      ("C-c j 8" . 'harpoon-jump-8))
+	          ("C-c j m" . 'harpoon-set)
+	          ("C-c j b" . 'harpoon-buffer)
+	          ("C-c j 1" . 'harpoon-jump-1)
+	          ("C-c j 2" . 'harpoon-jump-2)
+	          ("C-c j 3" . 'harpoon-jump-3)
+	          ("C-c j 4" . 'harpoon-jump-4)
+	          ("C-c j 5" . 'harpoon-jump-5)
+	          ("C-c j 6" . 'harpoon-jump-6)
+	          ("C-c j 7" . 'harpoon-jump-7)
+	          ("C-c j 8" . 'harpoon-jump-8))
   :config
   (add-to-list
    'display-buffer-alist
@@ -381,7 +395,7 @@
      (window-parameters
       (no-delete-other-windows . nil))))
   (harpoon-minor-mode 1))
-  
+
 (use-package display-line-numbers
   :hook (prog-mode LaTeX-mode)
   :custom
@@ -389,9 +403,14 @@
   (display-line-numbers-width-start 100))
 
 (use-package outline
-  :hook (prog-mode . outline-minor-mode)
-  :custom
-  (outline-minor-mode-highlight 'append))
+  :init
+  (define-globalized-minor-mode fab/global-outline-minor-mode outline-minor-mode
+    (lambda () (outline-minor-mode 1)))
+  :config
+  (fab/global-outline-minor-mode 1)
+  ;; :custom
+  ;; (outline-minor-mode-highlight 'append)
+  )
 
 (use-package nerd-icons-completion
   :after marginalia
@@ -712,6 +731,7 @@
   :hook prog-mode)
 
 (use-package indent-bars
+  :disabled
   :vc (:fetcher github :repo jdtsmith/indent-bars)
   :hook (c-ts-mode c++-ts-mode python-ts-mode)
   :custom
@@ -930,31 +950,31 @@
   ("C-c n d" . org-roam-dailies-map))
 
 (use-package consult-org-roam
-   :after org-roam
-   :init
-   (require 'consult-org-roam)
-   ;; Activate the minor mode
-   (consult-org-roam-mode 1)
-   :custom
-   ;; Use `ripgrep' for searching with `consult-org-roam-search'
-   (consult-org-roam-grep-func #'consult-ripgrep)
-   ;; Configure a custom narrow key for `consult-buffer'
-   (consult-org-roam-buffer-narrow-key ?r)
-   ;; Display org-roam buffers right after non-org-roam buffers
-   ;; in consult-buffer (and not down at the bottom)
-   (consult-org-roam-buffer-after-buffers t)
-   :config
-   ;; Eventually suppress previewing for certain functions
-   (consult-customize
-    consult-org-roam-forward-links
-    :preview-key "M-.")
-   :bind
-   ;; Define some convenient keybindings as an addition
-   ("C-c n F" . consult-org-roam-file-find)
-   ("C-c n b" . consult-org-roam-backlinks)
-   ("C-c n B" . consult-org-roam-backlinks-recursive)
-   ("C-c n l" . consult-org-roam-forward-links)
-   ("C-c n s" . consult-org-roam-search))
+  :after org-roam
+  :init
+  (require 'consult-org-roam)
+  ;; Activate the minor mode
+  (consult-org-roam-mode 1)
+  :custom
+  ;; Use `ripgrep' for searching with `consult-org-roam-search'
+  (consult-org-roam-grep-func #'consult-ripgrep)
+  ;; Configure a custom narrow key for `consult-buffer'
+  (consult-org-roam-buffer-narrow-key ?r)
+  ;; Display org-roam buffers right after non-org-roam buffers
+  ;; in consult-buffer (and not down at the bottom)
+  (consult-org-roam-buffer-after-buffers t)
+  :config
+  ;; Eventually suppress previewing for certain functions
+  (consult-customize
+   consult-org-roam-forward-links
+   :preview-key "M-.")
+  :bind
+  ;; Define some convenient keybindings as an addition
+  ("C-c n F" . consult-org-roam-file-find)
+  ("C-c n b" . consult-org-roam-backlinks)
+  ("C-c n B" . consult-org-roam-backlinks-recursive)
+  ("C-c n l" . consult-org-roam-forward-links)
+  ("C-c n s" . consult-org-roam-search))
 
 (use-package bibtex
   :custom
@@ -1094,10 +1114,15 @@
   (pdf-tools-install))
 
 (use-package treesit-auto
-  :config
-  (global-treesit-auto-mode)
   :custom
-  (treesit-auto-install t))
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+(use-package treesit-fold
+  :vc (:fetcher github :repo abougouffa/treesit-fold)
+  :after evil)
 
 (use-package compile
   :commands (compile recompile)
@@ -1106,7 +1131,6 @@
 
 (use-package flymake
   :custom
-  (flymake-show-diagnostics-at-end-of-line 'short)
   (flymake-no-changes-timeout 1.5))
 
 (use-package eldoc
@@ -1172,7 +1196,7 @@
   (lua-indent-level 4))
 
 (use-package wgrep
-  :defer t)
+  :demand t)
 
 (use-package atomic-chrome
   :commands (atomic-chrome-start-server))

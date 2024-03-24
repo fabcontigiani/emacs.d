@@ -957,9 +957,33 @@
    ("C-c n s" . consult-org-roam-search))
 
 (use-package bibtex
-  :defer t
   :custom
   (bibtex-dialect 'biblatex))
+
+(use-package ebib
+  :custom
+  (ebib-bibtex-dialect 'biblatex)
+  (ebib-preload-bib-files '("/home/fab/Documents/org/references.bib"))
+  :general
+  (fab/leader-keys
+    "o b" 'ebib :wk "Open bibliography"))
+
+(use-package biblio
+  :custom
+  (biblio-bibtex-use-autokey t))
+
+(use-package biblio-openlibrary
+  ;; :vc (:fetcher github :repo fabcontigiani/biblio-openlibrary)
+  :load-path "~/Projects/biblio-openlibrary/"
+  :after biblio)
+
+(use-package ebib-biblio
+  :ensure nil
+  :after (ebib biblio)
+  :bind (:map ebib-index-mode-map
+              ("B" . ebib-biblio-import-doi)
+              :map biblio-selection-mode-map
+              ("e" . ebib-biblio-selection-import)))
 
 (use-package citar
   :commands (citar-open)
